@@ -28,7 +28,7 @@ class BreakingNewsFragment:Fragment(R.layout.fragment_breaking_news) {
         viewModel=(activity as MainActivity).viewModel
         setupViewAdapter()
 
-        viewModel.getBreakingNews("us")
+
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is Resource.Loading

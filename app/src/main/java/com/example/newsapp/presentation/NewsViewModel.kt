@@ -24,6 +24,10 @@ class NewsViewModel @Inject constructor(private val newsRepository: NewsReposito
      var searchingNewsPage = 1
     var searchingNewsResponse : NewsResponse? = null
 
+    init {
+        getBreakingNews("us")
+    }
+
 
     fun getBreakingNews( countryCode:String)=viewModelScope.launch {
         breakingNews.value=Resource.Loading()
