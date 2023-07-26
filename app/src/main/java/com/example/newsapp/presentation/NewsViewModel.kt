@@ -16,10 +16,14 @@ import javax.inject.Inject
 class NewsViewModel @Inject constructor(private val newsRepository: NewsRepository) : ViewModel() {
 
     val breakingNews = MutableLiveData<Resource<NewsResponse>>()
-    private var breakingNewsPage = 1
+     var breakingNewsPage = 1
+    var breakingNewsResponse : NewsResponse? = null
+
 
     val searchingNews = MutableLiveData<Resource<NewsResponse>>()
-    private var searchingNewsPage = 1
+     var searchingNewsPage = 1
+    var searchingNewsResponse : NewsResponse? = null
+
 
     fun getBreakingNews( countryCode:String)=viewModelScope.launch {
         breakingNews.value=Resource.Loading()
@@ -43,18 +47,34 @@ class NewsViewModel @Inject constructor(private val newsRepository: NewsReposito
 
 
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse>{
-    return if (response.isSuccessful) {
-          Resource.Success(response.body()!!)
+        if (response.isSuccessful){
+            response.body()?.let { resultResponse ->
+                breakingNewsPage++
+                if (breakingNewsResponse == null){
+                    breakingNewsResponse = resultResponse
+                } else {
+                    val oldArticles = breakingNewsResponse?.articles
+                    val newArticles = resultResponse.articles
+                    oldArticles?.addAll(newArticles)
+                }
+                return Resource.Success(breakingNewsResponse ?: resultResponse)
+            }
         }
-        else{
-           Resource.Error(response.message())
+        return Resource.Error(response.message())
+    }
+    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> { if (response.isSuccessful){
+        response.body()?.let { resultResponse ->
+            searchingNewsPage++
+            if (searchingNewsResponse == null){
+                searchingNewsResponse = resultResponse
+            } else {
+                val oldArticles = searchingNewsResponse?.articles
+                val newArticles = resultResponse.articles
+                oldArticles?.addAll(newArticles)
+            }
+            return Resource.Success(searchingNewsResponse ?: resultResponse)
         }
     }
-    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        return if (response.isSuccessful) {
-            Resource.Success(response.body()!!)
-        } else {
-            Resource.Error(response.message())
-        }
+        return Resource.Error(response.message())
     }
 }
